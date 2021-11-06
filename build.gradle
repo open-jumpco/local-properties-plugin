@@ -1,0 +1,113 @@
+plugins {
+    id 'java-gradle-plugin'
+    id 'org.ysb33r.gradletest' version '3.0.0-alpha.2'
+    id 'com.gradle.plugin-publish' version '0.15.0'
+    id 'maven-publish'
+    id 'signing'
+}
+group = 'io.jumpco.open'
+if (project.findProperty('buildVersion') == 'LOCAL_SNAPSHOT') {
+    version = 'LOCAL_SNAPSHOT'
+} else {
+    version = '1.0.0'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+jar {
+    manifest {
+        attributes([
+                'Manifest-Version'      : '1.0',
+                'Implementation-Version': project.version,
+                'Build-Tag'             : project.version
+        ])
+    }
+}
+
+dependencies {
+    testCompileOnly gradleTestKit()
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    testImplementation 'org.assertj:assertj-core:3.21.0'
+
+    gradleTest 'org.junit.jupiter:junit-jupiter:5.7.2'
+    gradleTest 'org.assertj:assertj-core:3.21.0'
+}
+
+targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_1_8
+
+gradlePlugin {
+    // Define the plugin
+    plugins {
+        localPropertiesPlugin {
+            id = 'io.jumpco.open.gradle.local-properties'
+            displayName = 'Local Properties Plugin'
+            description = 'Override properties with gradle.local.properties'
+            implementationClass = 'io.jumpco.open.gradle.LocalPropertiesPlugin'
+        }
+    }
+}
+
+// Add a source set for the functional test suite
+sourceSets {
+    functionalTest {
+    }
+}
+
+gradlePlugin.testSourceSets(sourceSets.functionalTest)
+configurations.functionalTestImplementation.extendsFrom(configurations.testImplementation)
+
+// Add a task to run the functional tests
+tasks.register('functionalTest', Test) {
+    group 'verification'
+    testClassesDirs = sourceSets.functionalTest.output.classesDirs
+    classpath = sourceSets.functionalTest.runtimeClasspath
+    useJUnitPlatform()
+}
+
+tasks.named('check') {
+    // Run the functional tests as part of `check`
+    dependsOn(tasks.functionalTest)
+}
+
+tasks.named('test') {
+    // Use JUnit Platform for unit tests.
+    useJUnitPlatform()
+}
+
+pluginBundle {
+    website = 'https://open.jumpco.io/projects/local-properties-plugin.html'
+    vcsUrl = 'https://github.com/open-jumpco/local-properties-plugin'
+    plugins {
+        localPropertiesPlugin {
+            displayName = 'Local Properties Plugin'
+            description = 'Local Properties Plugin. Override properties with gradle.local.properties'
+            tags = ['override', 'properties']
+            version = project.version
+        }
+    }
+}
+
+
+task sourcesJar(type: Jar) {
+    from fileTree(dir: 'src/main/java')
+    archiveClassifier = 'sources'
+}
+
+artifacts {
+    archives jar
+    archives sourcesJar
+}
+
+gradleTest {
+    versions '7.2', '7.1.1', '7.0.2'
+    versions '6.8.3', '6.6.1', '6.5.1', '6.4.1', '6.3', '6.2.1', '6.1.1', '6.0.1'
+    versions '5.4.1', '5.5.1', '5.6.4'
+
+    beforeTest {
+        println "  ${it.name}"
+    }
+}

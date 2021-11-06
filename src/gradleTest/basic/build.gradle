@@ -1,0 +1,9 @@
+apply plugin: 'io.jumpco.open.gradle.local-properties'
+
+task runGradleTest {
+    dependsOn('listProperties')
+    doFirst {
+        assert project.hasProperty('abc')
+        assert project.findProperty('abc') == '123'
+    }
+}
