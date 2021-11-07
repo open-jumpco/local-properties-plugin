@@ -6,6 +6,7 @@
 This plugin provides for local properties to override gradle.properties.
 By creating a file named `gradle.local.properties` and updating properties these properties can be modified for local development.
 
+A warning will be logged when `gradle.local.properties` is found and contains any properties.
 A warning will be logged if the property in `gradle.local.properties` is a new property. 
 
 ## Setup
@@ -14,7 +15,7 @@ Add the following to your build.gradle file:
 
 ```groovy
 plugins {
-    id 'io.jumpco.open.gradle.local-properties' version '1.0.0'
+    id 'io.jumpco.open.gradle.local-properties' version '1.0.1'
 }
 ```
 

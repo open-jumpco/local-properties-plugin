@@ -37,19 +37,22 @@ public class LocalPropertiesPlugin implements Plugin<Project> {
 
         File localGradleProperties = new File(project.getProjectDir(), "gradle.local.properties");
         if (localGradleProperties.exists()) {
-            project.getLogger().lifecycle("local-properties:" + localGradleProperties.getName() + ":loading");
             try (FileInputStream fis = new FileInputStream(localGradleProperties)) {
                 properties.load(fis);
-                for (String key : properties.stringPropertyNames()) {
-                    String property = properties.getProperty(key);
-                    if (project.hasProperty(key)) {
-                        project.getLogger().info("local-properties:set:" + key + "=" + property);
-                        actions.put(key, "override");
-                    } else {
-                        project.getLogger().warn("local-properties:add:" + key + "=" + property);
-                        actions.put(key, "added");
+                if (!properties.isEmpty()) {
+                    project.getLogger().warn("local-properties:overriding with " + localGradleProperties.getName());
+                    for (String key : properties.stringPropertyNames()) {
+                        String property = properties.getProperty(key);
+                        if (project.hasProperty(key)) {
+                            project.getLogger().lifecycle("local-properties:set:" + key + "=" + property);
+                            actions.put(key, "override");
+                        } else {
+                            project.getLogger().warn("local-properties:add:" + key + "=" + property);
+                            actions.put(key, "added");
+
+                        }
+                        project.getExtensions().getExtraProperties().set(key, property);
                     }
-                    project.getExtensions().getExtraProperties().set(key, property);
                 }
             } catch (IOException e) {
                 project.getLogger().error("local-properties:exception:" + e, e);
