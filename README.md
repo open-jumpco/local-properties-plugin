@@ -28,3 +28,5 @@ See [gradle plugin page](https://plugins.gradle.org/plugin/io.jumpco.open.gradle
 Create a file name `gradle.local.properties` within a project folder in order to override properties.
 
 Ideally this file is added to `.gitignore` and not committed to your repository.
+
+The plugin will log a warning when it is overriding any properties and it will log a warning when it is encounters a property that is unique to `gradle.local.properties`.
